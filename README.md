@@ -10,7 +10,7 @@ twentytax is a comprehensive tax assistance application with three main features
 ### 1. Clone the Repository
 
 \`\`\`bash
-git clone https://github.com/yourusername/taxhelper.git
+git clone https://github.com/yourusername/twentytax.git
 cd taxhelper
 \`\`\`
 
