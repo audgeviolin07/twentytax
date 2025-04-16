@@ -1,6 +1,6 @@
-# TaxHelper
+# TwentyTax
 
-TaxHelper is a comprehensive tax assistance application with three main features:
+TwentyTax is a comprehensive tax assistance application with three main features:
 1. IRS Requirements Checker - Find out what tax forms you need to file based on your state
 2. Email Document Scanner - Scan your email for tax documents like W2s and 1099s
 3. Expense Classifier - Upload bank statements to classify expenses for tax filing
@@ -10,8 +10,8 @@ TaxHelper is a comprehensive tax assistance application with three main features
 ### 1. Clone the Repository
 
 \`\`\`bash
-git clone https://github.com/yourusername/taxhelper.git
-cd taxhelper
+git clone https://github.com/yourusername/TwentyTax.git
+cd TwentyTax
 \`\`\`
 
 ### 2. Install Dependencies

@@ -29,18 +29,14 @@ interface TaxDocumentData {
 function isSupabaseConfigured() {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  return !!supabaseUrl && !!supabaseKey
+  return Boolean(supabaseUrl && supabaseKey)
 }
 
-// Function to save emails to the database
+// Save emails to the database
 export async function saveEmails(userId: string, emails: EmailData[]) {
   try {
     if (!isSupabaseConfigured()) {
-      console.warn("Supabase not configured, returning mock data")
-      return emails.map((email, index) => ({
-        ...email,
-        id: `mock-${index}`,
-      }))
+      throw new Error("Database not configured")
     }
 
     const supabase = await createServerComponentClient()
@@ -60,11 +56,7 @@ export async function saveEmails(userId: string, emails: EmailData[]) {
     return data
   } catch (error: any) {
     console.error("Error in saveEmails:", error)
-    // Return mock data with IDs as fallback
-    return emails.map((email, index) => ({
-      ...email,
-      id: `mock-${index}`,
-    }))
+    throw error
   }
 }
 
@@ -106,8 +98,7 @@ export async function getUserEmails(userId: string) {
 export async function updateEmail(emailId: string, updates: Partial<EmailData>) {
   try {
     if (!isSupabaseConfigured()) {
-      console.warn("Supabase not configured, mock update")
-      return null
+      throw new Error("Database not configured")
     }
 
     const supabase = await createServerComponentClient()
@@ -126,16 +117,15 @@ export async function updateEmail(emailId: string, updates: Partial<EmailData>) 
     return data
   } catch (error: any) {
     console.error("Error in updateEmail:", error)
-    return null
+    throw error
   }
 }
 
-// Update deleteEmails
+// Delete emails
 export async function deleteEmails(emailIds: string[]) {
   try {
     if (!isSupabaseConfigured()) {
-      console.warn("Supabase not configured, mock delete")
-      return true
+      throw new Error("Database not configured")
     }
 
     const supabase = await createServerComponentClient()
@@ -153,7 +143,7 @@ export async function deleteEmails(emailIds: string[]) {
     return true
   } catch (error: any) {
     console.error("Error in deleteEmails:", error)
-    return false
+    throw error
   }
 }
 

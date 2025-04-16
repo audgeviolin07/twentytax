@@ -13,7 +13,7 @@ export default function Home() {
       <div className="flex flex-col items-center text-center mb-10 space-y-4">
         <h1 className="text-4xl font-bold tracking-tight">Simplify Your Tax Filing</h1>
         <p className="text-xl text-muted-foreground max-w-[700px]">
-          TaxHelper uses AI to help you understand tax requirements, find tax documents, and classify expenses.
+          TwentyTax uses AI to help you understand tax requirements, find tax documents, and classify expenses.
         </p>
       </div>
 

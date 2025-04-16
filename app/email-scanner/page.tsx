@@ -1,7 +1,7 @@
 import { EmailScannerForm } from "./email-scanner-form"
 
 export const metadata = {
-  title: "Email Scanner - TaxHelper",
+  title: "Email Scanner - TwentyTax",
   description: "Scan your emails for tax documents like 1099s and W2s",
 }
 

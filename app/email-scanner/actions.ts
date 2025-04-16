@@ -19,6 +19,18 @@ interface EmailDocument {
   preview: string
 }
 
+export interface EmailData {
+  id: string
+  from_address: string
+  subject: string
+  date: string
+  preview: string
+  read: boolean
+  starred: boolean
+  has_tax_document: boolean
+  document_type: string | null
+}
+
 // OAuth configuration for different providers
 const oauthConfig = {
   clientId: process.env.GMAIL_CLIENT_ID || "",
@@ -92,69 +104,8 @@ export async function connectEmailProvider(email: string, provider: EmailProvide
   }
 }
 
-// Function to fetch emails from the user's account
-export async function fetchEmails(email: string, provider: EmailProvider) {
-  try {
-    // Check if API is configured
-    if (!isApiConfigured()) {
-      throw new Error(API_ERROR_MESSAGES.missingApiKey)
-    }
-
-    // Get the current user and their email tokens
-    const supabase = await createServerComponentClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session?.user) {
-      throw new Error("User not authenticated")
-    }
-
-    // Get the user's email tokens
-    const { data: tokens } = await supabase
-      .from("email_tokens")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .eq("provider", provider)
-      .eq("email", email)
-      .single()
-
-    if (!tokens || !tokens.access_token) {
-      throw new Error("Email not connected. Please connect your email first.")
-    }
-
-    // Fetch emails from Gmail
-    const emails = await fetchGmailEmails(tokens.access_token, tokens.refresh_token)
-
-    // Transform emails to our standard format
-    const standardizedEmails = emails.map((email: any) => ({
-      from_address: email.from,
-      subject: email.subject,
-      date: email.date,
-      preview: email.preview || email.snippet,
-      read: email.read || false,
-      starred: email.starred || false,
-      has_tax_document: false, // Will be updated after scanning
-      document_type: null,
-    }))
-
-    // Save emails to the database
-    try {
-      await saveEmails(session.user.id, standardizedEmails)
-    } catch (error) {
-      console.error("Error saving emails to database:", error)
-      // Continue even if saving fails
-    }
-
-    return standardizedEmails
-  } catch (error: any) {
-    console.error("Error fetching emails:", error)
-    throw new Error(error.message || "Failed to fetch emails")
-  }
-}
-
 // Function to fetch emails from Gmail
-async function fetchGmailEmails(accessToken: string, refreshToken: string) {
+async function fetchGmailEmails(accessToken: string, refreshToken: string): Promise<EmailData[]> {
   try {
     const oauth2Client = new google.auth.OAuth2(oauthConfig.clientId, oauthConfig.clientSecret, oauthConfig.redirectUri)
 
@@ -194,12 +145,14 @@ async function fetchGmailEmails(accessToken: string, refreshToken: string) {
 
         return {
           id: msg.data.id!,
+          from_address: from,
           subject,
-          from,
           date,
-          snippet,
+          preview: snippet,
           read: !(msg.data.labelIds || []).includes("UNREAD"),
           starred: (msg.data.labelIds || []).includes("STARRED"),
+          has_tax_document: false, // Will be updated after scanning
+          document_type: null,
         }
       }),
     )
@@ -207,7 +160,45 @@ async function fetchGmailEmails(accessToken: string, refreshToken: string) {
     return emails
   } catch (error) {
     console.error("Error fetching Gmail emails:", error)
-    throw new Error("Failed to fetch emails from Gmail")
+    throw error
+  }
+}
+
+export async function fetchEmails(email: string, provider: EmailProvider): Promise<EmailData[]> {
+  try {
+    // Check if API is configured
+    if (!isApiConfigured()) {
+      throw new Error(API_ERROR_MESSAGES.missingApiKey)
+    }
+
+    // Get the current user and their email tokens
+    const supabase = await createServerComponentClient()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.user) {
+      throw new Error("User not authenticated")
+    }
+
+    // Get the user's email tokens
+    const { data: tokens } = await supabase
+      .from("email_tokens")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .eq("provider", provider)
+      .eq("email", email)
+      .single()
+
+    if (!tokens || !tokens.access_token) {
+      throw new Error("Email not connected. Please connect your email first.")
+    }
+
+    // Fetch emails from Gmail
+    return await fetchGmailEmails(tokens.access_token, tokens.refresh_token)
+  } catch (error: any) {
+    console.error("Error fetching emails:", error)
+    throw new Error(error.message || "Failed to fetch emails")
   }
 }
 

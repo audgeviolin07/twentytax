@@ -1,7 +1,7 @@
 import { ExpenseClassifierForm } from "./expense-classifier-form"
 
 export const metadata = {
-  title: "Expense Classifier - TaxHelper",
+  title: "Expense Classifier - TwentyTax",
   description: "Classify your expenses for tax filing",
 }
 

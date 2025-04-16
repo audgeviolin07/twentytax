@@ -9,9 +9,9 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "TaxHelper - Simplify Your Tax Filing",
+  title: "Taxes",
   description: "Analyze IRS requirements, scan documents, and classify expenses for tax filing",
-    generator: 'v0.dev'
+    generator: 'taxes'
 }
 
 export default function RootLayout({
@@ -34,7 +34,7 @@ export default function RootLayout({
               <footer className="border-t py-6">
                 <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
                   <p className="text-center text-sm text-muted-foreground md:text-left">
-                    &copy; {new Date().getFullYear()} TaxHelper. All rights reserved.
+                    &copy; {new Date().getFullYear()} TwentyTax. All rights reserved.
                   </p>
                 </div>
               </footer>

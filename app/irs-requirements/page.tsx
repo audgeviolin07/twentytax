@@ -1,7 +1,7 @@
 import { IrsRequirementsForm } from "./irs-requirements-form"
 
 export const metadata = {
-  title: "What YOU Have to Do for Taxes - TaxHelper",
+  title: "What YOU Have to Do for Taxes - TwentyTax",
   description: "Find out exactly what tax forms you need to file based on your personal situation",
 }
 

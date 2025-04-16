@@ -39,7 +39,7 @@ export function MainNav() {
     <div className="flex w-full items-center justify-between">
       <div className="flex gap-6 md:gap-10">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="font-bold text-xl">TaxHelper</span>
+          <span className="font-bold text-xl">TwentyTax</span>
         </Link>
         <nav className="hidden md:flex items-center space-x-2">
           {routes.map((route) =>

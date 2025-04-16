@@ -11,21 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, Star, StarOff, FileText, Trash, RefreshCw, AlertCircle } from "lucide-react"
-import { fetchEmails } from "@/app/email-scanner/actions"
+import { fetchEmails, type EmailData } from "@/app/email-scanner/actions"
 import { updateEmail, deleteEmails } from "@/app/email-scanner/db-actions"
 import { getBrowserClient } from "@/utils/supabase"
-
-interface Email {
-  id: string
-  from_address: string
-  subject: string
-  date: string
-  preview: string
-  read: boolean
-  starred: boolean
-  has_tax_document: boolean
-  document_type?: string
-}
 
 interface EmailFeedProps {
   userEmail: string
@@ -33,8 +21,9 @@ interface EmailFeedProps {
 }
 
 export function EmailFeed({ userEmail, isAuthenticated }: EmailFeedProps) {
-  const [emails, setEmails] = useState<Email[]>([])
+  const [emails, setEmails] = useState<EmailData[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState("inbox")
   const { user } = useAuth()
@@ -47,17 +36,20 @@ export function EmailFeed({ userEmail, isAuthenticated }: EmailFeedProps) {
     }
   }, [isAuthenticated, user])
 
-  // Update the loadEmails function to handle authentication better
   const loadEmails = async () => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) {
+      setError("Email not connected")
+      return
+    }
 
     setLoading(true)
+    setError(null)
     try {
-      // Fetch emails without relying on user authentication
       const fetchedEmails = await fetchEmails(userEmail, "gmail")
       setEmails(fetchedEmails)
     } catch (error: any) {
       console.error("Error loading emails:", error)
+      setError(error.message || "Failed to load emails")
       toast({
         title: "Error loading emails",
         description: error.message || "Please try again later",
@@ -149,9 +141,9 @@ export function EmailFeed({ userEmail, isAuthenticated }: EmailFeedProps) {
         <CardContent className="pt-6">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">Not Connected</h3>
+            <h3 className="text-lg font-medium">Email Not Connected</h3>
             <p className="text-sm text-muted-foreground mt-2 max-w-md">
-              Please connect your email account to view your emails and scan for tax documents.
+              Please connect your Gmail account to view your emails and scan for tax documents.
             </p>
           </div>
         </CardContent>
@@ -163,7 +155,10 @@ export function EmailFeed({ userEmail, isAuthenticated }: EmailFeedProps) {
     <Card className="mt-6">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
-          <CardTitle>Your Emails</CardTitle>
+          <div className="flex flex-col">
+            <CardTitle>Your Emails</CardTitle>
+            <p className="text-sm text-muted-foreground">Connected to {userEmail}</p>
+          </div>
           <div className="flex space-x-2">
             <Button variant="outline" size="sm" onClick={refreshEmails} disabled={loading}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -188,6 +183,12 @@ export function EmailFeed({ userEmail, isAuthenticated }: EmailFeedProps) {
             {loading ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                <h3 className="text-lg font-medium text-destructive">Error Loading Emails</h3>
+                <p className="text-sm text-muted-foreground mt-2 max-w-md">{error}</p>
               </div>
             ) : filteredEmails.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
